@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'https://dairy-backend-970c.onrender.com';
   static const String apiPrefix = '/api/v1';
 
   // Auth

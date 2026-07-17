@@ -66,7 +66,7 @@ class UploadCard extends StatelessWidget {
               children: [
                 Icon(Icons.cloud_upload_outlined, color: AppColors.textSecondary, size: 36),
                 SizedBox(height: 8),
-                Text('Tap to upload', style: AppTypography.bodySmall),
+                const Text('Tap to upload'),
               ],
             ),
           ),
@@ -101,14 +101,14 @@ class UploadCard extends StatelessWidget {
             TextButton.icon(
               onPressed: onUpload,
               icon: const Icon(Icons.swap_horiz, size: 18),
-              label: const Text('Change', style: AppTypography.bodySmall),
+              label: Text('Change', style: AppTypography.bodySmall),
               style: TextButton.styleFrom(foregroundColor: AppColors.primary),
             ),
             const SizedBox(width: UiConstants.md),
             TextButton.icon(
               onPressed: onRemove,
               icon: const Icon(Icons.delete_outline, size: 18),
-              label: const Text('Remove', style: AppTypography.bodySmall),
+              label: Text('Remove', style: AppTypography.bodySmall),
               style: TextButton.styleFrom(foregroundColor: AppColors.error),
             ),
           ],
@@ -143,7 +143,7 @@ class _DashedBorderPainter extends CustomPainter {
     for (final metric in metrics) {
       double distance = 0;
       while (distance < metric.length) {
-        final end = (distance + dashWidth).clamp(0, metric.length);
+        final end = (distance + dashWidth).clamp(0.0, metric.length);
         final segment = metric.extractPath(distance, end);
         canvas.drawPath(segment, paint);
         distance += dashWidth + dashGap;

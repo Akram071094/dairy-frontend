@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_colors.dart';
 
 class SuccessAnimation extends StatefulWidget {
@@ -61,36 +60,26 @@ class _SuccessAnimationState extends State<SuccessAnimation>
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Lottie.asset(
-        'assets/animations/checkmark.json',
-        width: 200,
-        height: 200,
-        errorBuilder: (context, error, stackTrace) =>
-            ListenableBuilder(
-          listenable: _controller,
-          builder: (context, child) {
-            final paintProgress = _controller.value >= 0.5
-                ? (_controller.value - 0.5) / 0.5
-                : 0.0;
+      child: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, child) {
+          final paintProgress = _controller.value >= 0.5
+              ? (_controller.value - 0.5) / 0.5
+              : 0.0;
 
-            return Transform.scale(
-              scale: _scale.value,
-              child: Transform.rotate(
-                angle: _rotation.value,
-                child: CustomPaint(
-                  size: const Size(120, 120),
-                  painter: _CheckmarkPainter(
-                    progress: paintProgress.clamp(0.0, 1.0),
-                    color: AppColors.success,
-                  ),
+          return Transform.scale(
+            scale: _scale.value,
+            child: Transform.rotate(
+              angle: _rotation.value,
+              child: CustomPaint(
+                size: const Size(120, 120),
+                painter: _CheckmarkPainter(
+                  progress: paintProgress.clamp(0.0, 1.0),
+                  color: AppColors.success,
                 ),
               ),
-            );
-          },
-        ),
-        onLoaded: (composition) {
-          _controller.duration = composition.duration;
-          _controller.forward();
+            ),
+          );
         },
       ),
     );
@@ -109,7 +98,7 @@ class _CheckmarkPainter extends CustomPainter {
     final radius = size.width / 2;
 
     final bgPaint = Paint()
-      ..color = color.withOpacity(0.1)
+      ..color = color.withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(center, radius, bgPaint);

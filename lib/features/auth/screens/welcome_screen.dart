@@ -83,7 +83,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               _buildAnimatedItem(
                 index: 1,
                 child: Text(
-                  'Welcome to ${AppConstants.appName}',
+                  'Zheng',
                   style: AppTypography.display,
                   textAlign: TextAlign.center,
                 ),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dairy_frontend/core/constants/app_constants.dart';
 import 'package:dairy_frontend/core/constants/ui_constants.dart';
+import 'package:dairy_frontend/core/router/app_router.dart';
 import 'package:dairy_frontend/core/theme/app_colors.dart';
 import 'package:dairy_frontend/core/theme/app_dimensions.dart';
 import 'package:dairy_frontend/core/theme/app_typography.dart';
@@ -114,13 +117,24 @@ class _BusinessSetupScreenState extends State<BusinessSetupScreen> {
       language: _language,
     );
     try {
-      await provider.createOrg(request);
-      if (mounted) context.pop();
-    } catch (_) {}
+      final orgId = await provider.createOrg(request);
+      if (mounted) context.go('/action-center/business-profile?orgId=$orgId');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create business: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _onSkip() async {
-    if (mounted) context.pop();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.onboardingSkippedKey, true);
+    if (mounted) context.go(AppRouter.actionCenter);
   }
 
   InputDecoration _inputDecoration(String label, {String? hint, Widget? suffix}) {
@@ -160,8 +174,7 @@ class _BusinessSetupScreenState extends State<BusinessSetupScreen> {
       isPrimaryLoading: provider.isLoading,
       primaryLabel: 'Create Business',
       onPrimaryTap: _onSubmit,
-      secondaryLabel: 'Skip for now',
-      onSecondaryTap: _onSkip,
+      showSecondary: false,
       formContent: Form(
         key: _formKey,
         child: Column(
@@ -281,14 +294,14 @@ class _BusinessSetupScreenState extends State<BusinessSetupScreen> {
               value: _timezone,
               decoration: _inputDecoration('Timezone'),
               items: _timezones.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-              onChanged: (v) => setState(() => _timezone = v),
+              onChanged: (v) => setState(() => _timezone = v ?? 'UTC'),
             ),
             const SizedBox(height: UiConstants.md),
             DropdownButtonFormField<String>(
               value: _currency,
               decoration: _inputDecoration('Currency'),
               items: _currencies.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-              onChanged: (v) => setState(() => _currency = v),
+              onChanged: (v) => setState(() => _currency = v ?? 'USD'),
             ),
             const SizedBox(height: UiConstants.md),
             DropdownButtonFormField<String>(
@@ -298,7 +311,7 @@ class _BusinessSetupScreenState extends State<BusinessSetupScreen> {
                 final label = {'en': 'English', 'hi': 'Hindi', 'es': 'Spanish', 'fr': 'French', 'ar': 'Arabic'}[l] ?? l;
                 return DropdownMenuItem(value: l, child: Text(label));
               }).toList(),
-              onChanged: (v) => setState(() => _language = v),
+              onChanged: (v) => setState(() => _language = v ?? 'en'),
             ),
           ],
         ),

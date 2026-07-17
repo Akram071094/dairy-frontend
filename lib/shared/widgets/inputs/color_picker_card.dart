@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
@@ -17,50 +16,76 @@ class ColorPickerCard extends StatelessWidget {
     required this.onColorChanged,
   });
 
+  static const List<Color> _presetColors = [
+    Color(0xFF0E7C66),
+    Color(0xFF5BA82E),
+    Color(0xFF2563EB),
+    Color(0xFFEF4444),
+    Color(0xFFF59E0B),
+    Color(0xFF22C55E),
+    Color(0xFF8B5CF6),
+    Color(0xFFEC4899),
+    Color(0xFF6366F1),
+    Color(0xFF14B8A6),
+    Color(0xFFF97316),
+    Color(0xFF1E293B),
+    Color(0xFF64748B),
+    Color(0xFF7C3AED),
+    Color(0xFFDB2777),
+    Color(0xFF0A5A4A),
+  ];
+
   void _showPicker(BuildContext context) {
     Color picked = color;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Choose $label', style: AppTypography.h3),
-        content: SingleChildScrollView(
-          child: BlockPicker(
-            pickerColor: picked,
-            onColorChanged: (c) => picked = c,
-            availableColors: const [
-              Color(0xFF2563EB),
-              Color(0xFF0D9488),
-              Color(0xFFEF4444),
-              Color(0xFFF59E0B),
-              Color(0xFF22C55E),
-              Color(0xFF8B5CF6),
-              Color(0xFFEC4899),
-              Color(0xFF6366F1),
-              Color(0xFF14B8A6),
-              Color(0xFFF97316),
-              Color(0xFF1E293B),
-              Color(0xFF64748B),
-            ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Choose $label', style: AppTypography.h3),
+          content: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _presetColors.map((c) {
+              final isSelected = c.value == picked.value;
+              return GestureDetector(
+                onTap: () => setDialogState(() => picked = c),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: c,
+                    borderRadius: AppDimensions.radiusSm,
+                    border: Border.all(
+                      color: isSelected ? AppColors.text : AppColors.border,
+                      width: isSelected ? 2.5 : 1,
+                    ),
+                  ),
+                  child: isSelected
+                      ? const Icon(Icons.check, color: Colors.white, size: 20)
+                      : null,
+                ),
+              );
+            }).toList(),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: AppTypography.bodySmall),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              onColorChanged(picked);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.textOnPrimary,
-              shape: RoundedRectangleBorder(borderRadius: AppDimensions.radiusSm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: AppTypography.bodySmall),
             ),
-            child: const Text('Select', style: AppTypography.button),
-          ),
-        ],
+            ElevatedButton(
+              onPressed: () {
+                onColorChanged(picked);
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textOnPrimary,
+                shape: RoundedRectangleBorder(borderRadius: AppDimensions.radiusSm),
+              ),
+              child: Text('Select', style: AppTypography.button),
+            ),
+          ],
+        ),
       ),
     );
   }

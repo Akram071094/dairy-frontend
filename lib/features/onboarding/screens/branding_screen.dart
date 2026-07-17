@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dairy_frontend/core/constants/app_constants.dart';
 import 'package:dairy_frontend/core/constants/ui_constants.dart';
+import 'package:dairy_frontend/core/router/app_router.dart';
 import 'package:dairy_frontend/core/theme/app_colors.dart';
 import 'package:dairy_frontend/core/theme/app_dimensions.dart';
 import 'package:dairy_frontend/core/theme/app_typography.dart';
@@ -22,25 +22,27 @@ class BrandingScreen extends StatefulWidget {
 class _BrandingScreenState extends State<BrandingScreen> {
   Color _primaryColor = AppColors.primary;
   Color _secondaryColor = AppColors.secondary;
-  String? _logoPath;
-  String? _faviconPath;
   bool _showPrimaryPicker = false;
   bool _showSecondaryPicker = false;
 
-  final _picker = ImagePicker();
-
-  Future<void> _pickImage(bool isLogo) async {
-    final file = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 1024, maxHeight: 1024);
-    if (file != null) {
-      setState(() {
-        if (isLogo) {
-          _logoPath = file.path;
-        } else {
-          _faviconPath = file.path;
-        }
-      });
-    }
-  }
+  static const List<Color> _presetColors = [
+    Color(0xFF0E7C66),
+    Color(0xFF5BA82E),
+    Color(0xFF2563EB),
+    Color(0xFF8B5CF6),
+    Color(0xFFEC4899),
+    Color(0xFFF43F5E),
+    Color(0xFFF97316),
+    Color(0xFFF59E0B),
+    Color(0xFF10B981),
+    Color(0xFF06B6D4),
+    Color(0xFF6366F1),
+    Color(0xFF78716C),
+    Color(0xFF1C1917),
+    Color(0xFF7C3AED),
+    Color(0xFFDB2777),
+    Color(0xFF0A5A4A),
+  ];
 
   Future<void> _onSubmit() async {
     final provider = context.read<OnboardingProvider>();
@@ -55,7 +57,9 @@ class _BrandingScreenState extends State<BrandingScreen> {
   }
 
   Future<void> _onSkip() async {
-    if (mounted) context.pop();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.onboardingSkippedKey, true);
+    if (mounted) context.go(AppRouter.actionCenter);
   }
 
   Widget _buildColorPickerSection({
@@ -98,29 +102,36 @@ class _BrandingScreenState extends State<BrandingScreen> {
         if (isOpen) ...[
           const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppColors.surfaceDim,
               borderRadius: AppDimensions.radiusSm,
               border: Border.all(color: AppColors.border),
             ),
-            child: BlockPicker(
-              pickerColor: currentColor,
-              onColorChanged: onColorChanged,
-              availableColors: [
-                AppColors.primary,
-                AppColors.secondary,
-                const Color(0xFF8B5CF6),
-                const Color(0xFFEC4899),
-                const Color(0xFFF43F5E),
-                const Color(0xFFF97316),
-                const Color(0xFFF59E0B),
-                const Color(0xFF10B981),
-                const Color(0xFF06B6D4),
-                const Color(0xFF6366F1),
-                const Color(0xFF78716C),
-                const Color(0xFF1C1917),
-              ],
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _presetColors.map((color) {
+                final isSelected = color.value == currentColor.value;
+                return GestureDetector(
+                  onTap: () => onColorChanged(color),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: AppDimensions.radiusSm,
+                      border: Border.all(
+                        color: isSelected ? AppColors.text : AppColors.border,
+                        width: isSelected ? 2.5 : 1,
+                      ),
+                    ),
+                    child: isSelected
+                        ? const Icon(Icons.check, color: Colors.white, size: 18)
+                        : null,
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -132,14 +143,13 @@ class _BrandingScreenState extends State<BrandingScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<OnboardingProvider>();
     return StepForm(
-      prompt: "Let's make it look great! Choose your brand colors and upload your logo.",
+      prompt: "Let's make it look great! Choose your brand colors.",
       stepNumber: 3,
       totalSteps: 5,
       isPrimaryLoading: provider.isLoading,
       primaryLabel: 'Save Branding',
       onPrimaryTap: _onSubmit,
-      secondaryLabel: 'Skip for now',
-      onSecondaryTap: _onSkip,
+      showSecondary: false,
       formContent: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -167,79 +177,9 @@ class _BrandingScreenState extends State<BrandingScreen> {
             }),
           ),
           const SizedBox(height: 24),
-          Text('Logo', style: AppTypography.h3),
-          const SizedBox(height: 16),
-          _buildImagePickerCard(
-            label: 'Upload Logo',
-            filePath: _logoPath,
-            onTap: () => _pickImage(true),
-            onClear: _logoPath != null ? () => setState(() => _logoPath = null) : null,
-          ),
-          const SizedBox(height: UiConstants.md),
-          Text('Favicon', style: AppTypography.h3),
-          const SizedBox(height: 16),
-          _buildImagePickerCard(
-            label: 'Upload Favicon',
-            filePath: _faviconPath,
-            onTap: () => _pickImage(false),
-            onClear: _faviconPath != null ? () => setState(() => _faviconPath = null) : null,
-          ),
-          const SizedBox(height: 24),
           Text('Preview', style: AppTypography.h3),
           const SizedBox(height: 16),
           _buildPreviewCard(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImagePickerCard({
-    required String label,
-    required String? filePath,
-    required VoidCallback onTap,
-    VoidCallback? onClear,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppDimensions.radiusSm,
-        border: Border.all(color: AppColors.border, style: BorderStyle.solid),
-      ),
-      child: Row(
-        children: [
-          if (filePath != null)
-            ClipRRect(
-              borderRadius: AppDimensions.radiusSm,
-              child: Image.file(
-                File(filePath),
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-              ),
-            )
-          else
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceDim,
-                borderRadius: AppDimensions.radiusSm,
-              ),
-              child: const Icon(Icons.image_outlined, color: AppColors.textSecondary),
-            ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(filePath != null ? 'Image selected' : label, style: AppTypography.bodySmall)),
-          if (onClear != null)
-            IconButton(
-              icon: const Icon(Icons.close, size: 18),
-              onPressed: onClear,
-              color: AppColors.textSecondary,
-            ),
-          TextButton(
-            onPressed: onTap,
-            child: Text(filePath != null ? 'Change' : 'Browse', style: AppTypography.link),
-          ),
         ],
       ),
     );
@@ -264,7 +204,7 @@ class _BrandingScreenState extends State<BrandingScreen> {
             ),
             child: Center(
               child: Text(
-                'M',
+                'Z',
                 style: AppTypography.h2.copyWith(color: Colors.white),
               ),
             ),

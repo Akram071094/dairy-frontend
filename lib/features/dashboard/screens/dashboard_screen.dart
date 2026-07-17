@@ -59,7 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              'MindFleet Dairy',
+              'DairyHub',
               style: AppTypography.h3.copyWith(color: AppColors.text),
             ),
           ],

@@ -74,7 +74,8 @@ class RetailersListScreen extends StatelessWidget {
           ActionCard(
             icon: Icons.person_add_rounded,
             title: 'Add New Retailer',
-            subtitle: 'Register a new retailer to your network',
+            description: 'Register a new retailer to your network',
+            buttonLabel: 'Add Retailer',
             onTap: () {},
           ),
           const SizedBox(height: 12),

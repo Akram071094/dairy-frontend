@@ -56,19 +56,15 @@ class _ConfettiAnimationState extends State<ConfettiAnimation>
 
 class _ConfettiParticle {
   final double startX;
-  final double endX;
-  final double startY;
-  final double endY;
-  final Color color;
-  final double size;
-  final double rotation;
-  final double delay;
+  late final double endX;
+  late final double startY;
+  late final double endY;
+  late final Color color;
+  late final double size;
+  late final double rotation;
+  late final double delay;
 
-  _ConfettiParticle(Random random)
-      : startX = random.nextDouble();
-  _init(random);
-
-  void _init(Random random) {
+  _ConfettiParticle(Random random) : startX = random.nextDouble() {
     endX = startX + (random.nextDouble() - 0.5) * 0.4;
     startY = -0.05 - random.nextDouble() * 0.1;
     endY = 0.85 + random.nextDouble() * 0.15;
@@ -95,14 +91,16 @@ class _ConfettiPainter extends CustomPainter {
 
   _ConfettiPainter({required this.particles, required this.progress});
 
+  double _lerp(double a, double b, double t) => a + (b - a) * t;
+
   @override
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
-      final t = ((progress - p.delay) / (1 - p.delay)).clamp(0, 1);
+      final t = ((progress - p.delay) / (1 - p.delay)).clamp(0.0, 1.0);
       if (t <= 0) continue;
 
-      final x = lerpDouble(p.startX, p.endX, t)! * size.width;
-      final y = lerpDouble(p.startY, p.endY, t)! * size.height;
+      final x = _lerp(p.startX, p.endX, t) * size.width;
+      final y = _lerp(p.startY, p.endY, t) * size.height;
       final opacity = t < 0.8 ? 1.0 : (1 - t) * 5;
       final scale = t < 0.1 ? t * 10 : 1.0;
 

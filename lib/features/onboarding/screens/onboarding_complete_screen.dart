@@ -16,180 +16,217 @@ class OnboardingCompleteScreen extends StatefulWidget {
 }
 
 class _OnboardingCompleteScreenState extends State<OnboardingCompleteScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scaleAnim;
+    with TickerProviderStateMixin {
+  late final AnimationController _rocketController;
+  late final AnimationController _contentController;
+  late final Animation<double> _rocketFloat;
+  late final Animation<double> _rocketRise;
   late final Animation<double> _fadeAnim;
+
+  final List<Map<String, dynamic>> _features = const [
+    {'icon': Icons.shopping_cart_outlined, 'title': 'Retailers', 'desc': 'Manage your retailer network & orders'},
+    {'icon': Icons.inventory_2_outlined, 'title': 'Inventory', 'desc': 'Real-time stock & movement tracking'},
+    {'icon': Icons.route_outlined, 'title': 'Planning & Delivery', 'desc': 'Smart routing and dispatch'},
+    {'icon': Icons.payments_outlined, 'title': 'Collections', 'desc': 'Track payments & dues seamlessly'},
+    {'icon': Icons.insights_outlined, 'title': 'AI Assistant', 'desc': 'Mia helps you run the business'},
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _rocketController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _contentController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: UiConstants.celebrationDuration),
     );
-    _scaleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _rocketFloat = Tween<double>(begin: 0.0, end: 12.0).animate(
+      CurvedAnimation(parent: _rocketController, curve: Curves.easeInOut),
+    );
+    _rocketRise = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.4, curve: Curves.elasticOut),
+        parent: _contentController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
       ),
     );
     _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _contentController,
         curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
       ),
     );
-    _controller.forward();
-    _autoTransition();
-  }
-
-  void _autoTransition() {
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted) _controller.reverse();
-    });
+    _rocketController.repeat(reverse: true);
+    _contentController.forward();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _rocketController.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Transform.scale(
-                  scale: _scaleAnim.value,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: const BoxDecoration(
-                      color: AppColors.successLight,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.check_circle,
-                        size: 64,
-                        color: AppColors.success,
+      backgroundColor: AppColors.surface,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            children: [
+              AnimatedBuilder(
+                animation: _rocketFloat,
+                builder: (context, child) => Transform.translate(
+                  offset: Offset(0, -_rocketFloat.value),
+                  child: child,
+                ),
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.25),
+                        blurRadius: 24,
+                        spreadRadius: 4,
                       ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.rocket_launch_rounded,
+                      size: 60,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                Opacity(
-                  opacity: _fadeAnim.value,
-                  child: Column(
+              ),
+              const SizedBox(height: 24),
+              AnimatedBuilder(
+                animation: _rocketRise,
+                builder: (context, child) => Transform.scale(
+                  scale: _rocketRise.value,
+                  child: Opacity(opacity: _fadeAnim.value, child: child),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "We're launching ${AppConstants.appName}!",
+                      style: AppTypography.display.copyWith(color: AppColors.text),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Your business is live. Here is what you can do next:',
+                      style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              AnimatedBuilder(
+                animation: _fadeAnim,
+                builder: (context, child) => Opacity(opacity: _fadeAnim.value, child: child),
+                child: Column(
+                  children: _features
+                      .map((f) => _featureTile(f['icon'], f['title'], f['desc']))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 32),
+              AnimatedBuilder(
+                animation: _fadeAnim,
+                builder: (context, child) => Opacity(opacity: _fadeAnim.value, child: child),
+                child: Container(
+                  padding: AppDimensions.cardPadding,
+                  decoration: BoxDecoration(
+                    color: AppColors.successLight,
+                    borderRadius: AppDimensions.radiusMd,
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        'Congratulations!',
-                        style: AppTypography.display.copyWith(color: AppColors.text),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Your business is now active on ${AppConstants.appName}!',
-                        style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildStatsRow(),
-                      const SizedBox(height: 32),
                       Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 24),
-                        padding: AppDimensions.cardPadding,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: AppDimensions.radiusMd,
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: AppColors.success,
+                          shape: BoxShape.circle,
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'M',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
+                        child: const Center(
+                          child: Text(
+                            'M',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                "I'm so excited for you! Your business is ready to grow. Let's make it amazing together!",
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.primaryDark,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: PrimaryButton(
-                          label: 'Go to Dashboard',
-                          onTap: () => context.go(AppRouter.dashboard),
-                          icon: const Icon(Icons.dashboard, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "I'm ${AppConstants.aiAssistantName}, your AI assistant — I'll help you every step of the way!",
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.success),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            );
-          },
+              ),
+              const SizedBox(height: 32),
+      PrimaryButton(
+        label: 'Sign in to continue',
+        onTap: () => context.go(AppRouter.login),
+        icon: const Icon(Icons.login_rounded, size: 20),
+      ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStatsRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+  Widget _featureTile(IconData icon, String title, String desc) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: AppDimensions.cardPadding,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppDimensions.radiusMd,
+        border: Border.all(color: AppColors.border),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _statCard('5', 'Steps\nCompleted'),
-          _statCard('100%', 'Profile\nComplete'),
-          _statCard('Live', 'Business\nStatus'),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: AppDimensions.radiusSm,
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(desc, style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _statCard(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: AppTypography.h1.copyWith(color: AppColors.success, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }

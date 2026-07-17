@@ -1,4 +1,4 @@
-enum MovementType { openingStock, stockIn, stockOut, return, adjustment }
+enum MovementType { openingStock, stockIn, stockOut, return_, adjustment }
 
 extension MovementTypeExtension on MovementType {
   String get value {
@@ -9,7 +9,7 @@ extension MovementTypeExtension on MovementType {
         return 'stock_in';
       case MovementType.stockOut:
         return 'stock_out';
-      case MovementType.return:
+      case MovementType.return_:
         return 'return';
       case MovementType.adjustment:
         return 'adjustment';
@@ -25,7 +25,7 @@ extension MovementTypeExtension on MovementType {
       case 'stock_out':
         return MovementType.stockOut;
       case 'return':
-        return MovementType.return;
+        return MovementType.return_;
       case 'adjustment':
         return MovementType.adjustment;
       default:

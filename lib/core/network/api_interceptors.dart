@@ -35,7 +35,7 @@ class ErrorInterceptor extends Interceptor {
       handler.reject(
         DioException(
           requestOptions: err.requestOptions,
-          error: NetworkException(),
+          error: NetworkException('Connection timed out. Check your internet or if the backend is awake.'),
           type: err.type,
         ),
       );
@@ -46,7 +46,10 @@ class ErrorInterceptor extends Interceptor {
       handler.reject(
         DioException(
           requestOptions: err.requestOptions,
-          error: NetworkException(),
+          error: NetworkException(
+            'Cannot reach the server (${err.message ?? 'connection failed'}). '
+            'Verify the phone has internet and can reach the backend URL.',
+          ),
           type: err.type,
         ),
       );

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dairy_frontend/core/constants/app_constants.dart';
 import 'package:dairy_frontend/core/constants/ui_constants.dart';
+import 'package:dairy_frontend/core/router/app_router.dart';
 import 'package:dairy_frontend/core/theme/app_colors.dart';
 import 'package:dairy_frontend/core/theme/app_dimensions.dart';
 import 'package:dairy_frontend/core/theme/app_typography.dart';
@@ -75,7 +78,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   }
 
   Future<void> _onSkip() async {
-    if (mounted) context.pop();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.onboardingSkippedKey, true);
+    if (mounted) context.go(AppRouter.actionCenter);
   }
 
   InputDecoration _inputDecoration(String label, {String? hint}) {
@@ -114,8 +119,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       isPrimaryLoading: provider.isLoading,
       primaryLabel: 'Save Profile',
       onPrimaryTap: _onSubmit,
-      secondaryLabel: 'Skip for now',
-      onSecondaryTap: _onSkip,
+      showSecondary: false,
       formContent: Form(
         key: _formKey,
         child: Column(

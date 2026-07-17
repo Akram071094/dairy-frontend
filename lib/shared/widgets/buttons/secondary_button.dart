@@ -39,7 +39,8 @@ class SecondaryButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) ...[icon, const SizedBox(width: 8)],
+                  if (icon != null) icon!,
+                  if (icon != null) const SizedBox(width: 8),
                   Text(label, style: AppTypography.button),
                 ],
               ),

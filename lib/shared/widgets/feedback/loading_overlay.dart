@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/constants/ui_constants.dart';
@@ -52,28 +51,7 @@ class _LoadingOverlayState extends State<LoadingOverlay>
     super.dispose();
   }
 
-  String _animationAsset() {
-    switch (widget.animationType) {
-      case LoadingAnimationType.document:
-        return 'assets/animations/document.json';
-      case LoadingAnimationType.building:
-        return 'assets/animations/building.json';
-      case LoadingAnimationType.data:
-        return 'assets/animations/data.json';
-      case LoadingAnimationType.color:
-        return 'assets/animations/color.json';
-      case LoadingAnimationType.gear:
-        return 'assets/animations/gear.json';
-      case LoadingAnimationType.rocket:
-        return 'assets/animations/rocket.json';
-      case LoadingAnimationType.upload:
-        return 'assets/animations/upload.json';
-      case LoadingAnimationType.generic:
-        return 'assets/animations/loading.json';
-    }
-  }
-
-  IconData _fallbackIcon() {
+  IconData _icon() {
     switch (widget.animationType) {
       case LoadingAnimationType.document:
         return Icons.description;
@@ -99,22 +77,22 @@ class _LoadingOverlayState extends State<LoadingOverlay>
     return Stack(
       children: [
         Container(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withValues(alpha: 0.4),
         ),
         Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: Lottie.asset(
-                  _animationAsset(),
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    _fallbackIcon(),
-                    size: 64,
-                    color: AppColors.textOnPrimary,
-                  ),
+              ListenableBuilder(
+                listenable: _pulse,
+                builder: (context, child) => Transform.scale(
+                  scale: _pulse.value,
+                  child: child,
+                ),
+                child: Icon(
+                  _icon(),
+                  size: 64,
+                  color: AppColors.textOnPrimary,
                 ),
               ),
               const SizedBox(height: UiConstants.lg),

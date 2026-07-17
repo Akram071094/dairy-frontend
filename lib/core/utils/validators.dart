@@ -29,6 +29,12 @@ class Validators {
     return null;
   }
 
+  static String? optionalName(String? value, [String fieldName = 'This field']) {
+    if (value == null || value.trim().isEmpty) return null;
+    if (value.trim().length < 2) return '$fieldName must be at least 2 characters';
+    return null;
+  }
+
   static String? businessCode(String? value) {
     if (value == null || value.isEmpty) return 'Business code is required';
     if (value.length < 3) return 'Business code must be at least 3 characters';

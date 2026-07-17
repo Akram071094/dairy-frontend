@@ -11,7 +11,7 @@ import '../../features/onboarding/screens/branding_screen.dart';
 import '../../features/onboarding/screens/preferences_screen.dart';
 import '../../features/onboarding/screens/review_screen.dart';
 import '../../features/onboarding/screens/onboarding_complete_screen.dart';
-import '../../features/dashboard/screens/app_shell.dart';
+import '../../features/chat/screens/mia_chat_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -28,6 +28,7 @@ class AppRouter {
   static const String review = '/review';
   static const String onboardingComplete = '/complete';
   static const String dashboard = '/app';
+  static const String miaChat = '/mia';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -66,7 +67,8 @@ class AppRouter {
           ),
         ],
       ),
-      GoRoute(path: dashboard, builder: (_, __) => const AppShell()),
+      GoRoute(path: dashboard, builder: (_, __) => const MiaChatScreen()),
+      GoRoute(path: miaChat, builder: (_, __) => const MiaChatScreen()),
     ],
     errorBuilder: (_, __) => const Scaffold(
       body: Center(child: Text('Page not found')),

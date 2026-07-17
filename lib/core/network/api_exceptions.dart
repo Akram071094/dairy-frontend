@@ -10,7 +10,8 @@ class ApiException implements Exception {
 }
 
 class NetworkException extends ApiException {
-  NetworkException() : super(message: 'No internet connection');
+  NetworkException([String message = 'No internet connection'])
+      : super(message: message);
 }
 
 class AuthException extends ApiException {

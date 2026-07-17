@@ -12,6 +12,7 @@ class AppDimensions {
   static const BorderRadius radiusMd = BorderRadius.all(Radius.circular(12));
   static const BorderRadius radiusLg = BorderRadius.all(Radius.circular(16));
   static const BorderRadius radiusXl = BorderRadius.all(Radius.circular(24));
+  static const BorderRadius radiusFull = BorderRadius.all(Radius.circular(999));
 
   // Card elevation
   static const double cardElevation = 1;

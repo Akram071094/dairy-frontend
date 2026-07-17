@@ -50,7 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
     if (!mounted) return;
     if (authProvider.isAuthenticated) {
-      context.go(AppRouter.actionCenter);
+      context.go('/action-center/business-setup');
     }
   }
 
@@ -94,7 +94,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           labelText: 'First name',
                           hintText: 'John',
                         ),
-                        validator: (v) => Validators.required(v, 'First name'),
+                        validator: (v) => Validators.optionalName(v, 'First name'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -107,7 +107,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           labelText: 'Last name',
                           hintText: 'Doe',
                         ),
-                        validator: (v) => Validators.required(v, 'Last name'),
+                        validator: (v) => Validators.optionalName(v, 'Last name'),
                       ),
                     ),
                   ],
