@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:dairy_frontend/core/constants/app_constants.dart';
 import 'package:dairy_frontend/core/constants/ui_constants.dart';
+import 'package:dairy_frontend/core/router/app_router.dart';
 import 'package:dairy_frontend/core/theme/app_colors.dart';
 import 'package:dairy_frontend/core/theme/app_dimensions.dart';
 import 'package:dairy_frontend/core/theme/app_typography.dart';
@@ -145,7 +147,7 @@ class _OnboardingCompleteScreenState extends State<OnboardingCompleteScreen>
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: PrimaryButton(
                           label: 'Go to Dashboard',
-                          onTap: () {},
+                          onTap: () => context.go(AppRouter.dashboard),
                           icon: const Icon(Icons.dashboard, size: 20),
                         ),
                       ),

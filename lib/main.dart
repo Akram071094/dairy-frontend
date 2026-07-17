@@ -9,6 +9,7 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/services/auth_service.dart';
 import 'features/onboarding/providers/onboarding_provider.dart';
 import 'features/onboarding/services/onboarding_service.dart';
+import 'features/dashboard/providers/dashboard_provider.dart';
 import 'core/constants/app_constants.dart';
 
 void main() async {
@@ -31,6 +32,9 @@ void main() async {
             onboardingService: OnboardingService(apiClient: apiClient),
             prefs: prefs,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DashboardProvider(apiClient: apiClient),
         ),
       ],
       child: const DairyApp(),
