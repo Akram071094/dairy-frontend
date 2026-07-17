@@ -1,0 +1,17 @@
+.dart_tool/
+.packages
+.pub/
+build/
+*.iml
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.log
+*.key
+*.pem
+*.cert
+.env
+.flutter-plugins
+.flutter-plugins-dependencies
