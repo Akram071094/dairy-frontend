@@ -2,9 +2,11 @@ import 'package:uuid/uuid.dart';
 
 class UserModel {
   final String id;
+  final String businessCode;
   final String email;
   final String firstName;
   final String lastName;
+  final String displayName;
   final String? phone;
   final String? avatarUrl;
   final String status;
@@ -14,9 +16,11 @@ class UserModel {
 
   UserModel({
     required this.id,
+    required this.businessCode,
     required this.email,
     this.firstName = '',
     this.lastName = '',
+    this.displayName = '',
     this.phone,
     this.avatarUrl,
     this.status = 'active',
@@ -30,9 +34,11 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? const Uuid().v4(),
+      businessCode: json['business_code'] ?? '',
       email: json['email'] ?? '',
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
+      displayName: json['display_name'] ?? json['first_name'] ?? '',
       phone: json['phone'],
       avatarUrl: json['avatar_url'],
       status: json['status'] ?? 'active',
@@ -44,9 +50,11 @@ class UserModel {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'business_code': businessCode,
     'email': email,
     'first_name': firstName,
     'last_name': lastName,
+    'display_name': displayName,
     'phone': phone,
     'avatar_url': avatarUrl,
     'status': status,
@@ -56,14 +64,14 @@ class UserModel {
 class LoginRequest {
   final String email;
   final String password;
-  final String? organizationCode;
+  final String organizationCode;
 
-  LoginRequest({required this.email, required this.password, this.organizationCode});
+  LoginRequest({required this.email, required this.password, required this.organizationCode});
 
   Map<String, dynamic> toJson() => {
     'email': email,
     'password': password,
-    if (organizationCode != null) 'organization_code': organizationCode,
+    'organization_code': organizationCode,
   };
 }
 
@@ -125,7 +133,6 @@ class SignupResponse {
   final String tokenType;
   final int expiresIn;
   final UserModel user;
-  final OrganizationBrief? organization;
 
   SignupResponse({
     required this.accessToken,
@@ -133,7 +140,6 @@ class SignupResponse {
     required this.tokenType,
     required this.expiresIn,
     required this.user,
-    this.organization,
   });
 
   factory SignupResponse.fromJson(Map<String, dynamic> json) {
@@ -143,9 +149,6 @@ class SignupResponse {
       tokenType: json['token_type'] ?? 'bearer',
       expiresIn: json['expires_in'] ?? 3600,
       user: UserModel.fromJson(json['user'] ?? {}),
-      organization: json['organization'] != null
-          ? OrganizationBrief.fromJson(json['organization'])
-          : null,
     );
   }
 }
@@ -154,13 +157,21 @@ class OrganizationBrief {
   final String id;
   final String businessCode;
   final String displayName;
+  final String legalName;
+  final String businessType;
   final String status;
+  final String timezone;
+  final String currency;
 
   OrganizationBrief({
     required this.id,
     required this.businessCode,
     required this.displayName,
+    this.legalName = '',
+    this.businessType = '',
     required this.status,
+    this.timezone = 'UTC',
+    this.currency = 'USD',
   });
 
   factory OrganizationBrief.fromJson(Map<String, dynamic> json) {
@@ -168,7 +179,11 @@ class OrganizationBrief {
       id: json['id']?.toString() ?? '',
       businessCode: json['business_code'] ?? '',
       displayName: json['display_name'] ?? json['org_name'] ?? '',
+      legalName: json['legal_name'] ?? '',
+      businessType: json['business_type'] ?? '',
       status: json['status'] ?? '',
+      timezone: json['timezone'] ?? 'UTC',
+      currency: json['currency'] ?? 'USD',
     );
   }
 }
