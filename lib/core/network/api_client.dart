@@ -24,7 +24,6 @@ class ApiClient {
 
     _dio.interceptors.addAll([
       AuthInterceptor(_storage),
-      ResponseEnvelopeInterceptor(),
       ErrorInterceptor(),
       LoggingInterceptor(),
     ]);
