@@ -27,6 +27,19 @@ class AuthInterceptor extends Interceptor {
   }
 }
 
+class ResponseEnvelopeInterceptor extends Interceptor {
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (response.data is Map<String, dynamic>) {
+      final body = response.data as Map<String, dynamic>;
+      if (body.containsKey('success') && body.containsKey('data')) {
+        response.data = body['data'];
+      }
+    }
+    handler.next(response);
+  }
+}
+
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
@@ -59,8 +72,10 @@ class ErrorInterceptor extends Interceptor {
     final response = err.response;
     if (response != null) {
       final data = response.data;
-      final message = data?['message'] ?? 'Something went wrong';
-      final errorCode = data?['error']?['code'] ?? data?['error_code'];
+      final errorObj = data is Map ? data['error'] : null;
+      final message = errorObj is Map
+          ? (errorObj['message'] ?? data['message'] ?? 'Something went wrong')
+          : (data is Map ? data['message'] ?? 'Something went wrong' : 'Something went wrong');
 
       switch (response.statusCode) {
         case 401:
@@ -129,20 +144,38 @@ class ErrorInterceptor extends Interceptor {
   }
 
   Map<String, String?>? _parseFieldErrors(dynamic data) {
-    if (data is Map && data.containsKey('detail')) {
-      final detail = data['detail'];
-      if (detail is List) {
-        final errors = <String, String?>{};
-        for (final d in detail) {
-          if (d is Map) {
-            final loc = d['loc'];
-            final field = loc is List && loc.length > 1 ? loc.last.toString() : null;
-            if (field != null) {
-              errors[field] = d['msg'];
+    if (data is Map) {
+      final errorObj = data['error'];
+      if (errorObj is Map && errorObj.containsKey('details')) {
+        final details = errorObj['details'];
+        if (details is List) {
+          final errors = <String, String?>{};
+          for (final d in details) {
+            if (d is Map) {
+              final field = d['field']?.toString();
+              if (field != null) {
+                errors[field] = d['message']?.toString();
+              }
             }
           }
+          return errors;
         }
-        return errors;
+      }
+      if (data.containsKey('detail')) {
+        final detail = data['detail'];
+        if (detail is List) {
+          final errors = <String, String?>{};
+          for (final d in detail) {
+            if (d is Map) {
+              final loc = d['loc'];
+              final field = loc is List && loc.length > 1 ? loc.last.toString() : null;
+              if (field != null) {
+                errors[field] = d['msg'];
+              }
+            }
+          }
+          return errors;
+        }
       }
     }
     return null;
