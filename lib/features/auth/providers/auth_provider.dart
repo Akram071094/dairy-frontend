@@ -47,6 +47,13 @@ class AuthProvider extends ChangeNotifier {
       await _storeTokens(response.accessToken, response.refreshToken);
       _accessToken = response.accessToken;
       _currentUser = response.user;
+      if (response.organization != null) {
+        _organizationId = response.organization!.id;
+        await _storage.write(
+          key: AppConstants.currentOrgIdKey,
+          value: _organizationId,
+        );
+      }
       _setLoading(false);
     } on ApiException catch (e) {
       _setError(e.message);

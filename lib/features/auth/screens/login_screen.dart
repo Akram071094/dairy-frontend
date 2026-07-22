@@ -21,14 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _orgCodeController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _orgCodeController.dispose();
     super.dispose();
   }
 
@@ -39,7 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
       LoginRequest(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        organizationCode: _orgCodeController.text.trim(),
       ),
     );
     if (!mounted) return;
@@ -109,23 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   validator: Validators.password,
-                  onFieldSubmitted: (_) => _handleLogin(),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _orgCodeController,
-                  textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    labelText: 'Organization Code',
-                    hintText: 'Enter your organization code',
-                    prefixIcon: Icon(Icons.business_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Organization code is required';
-                    }
-                    return null;
-                  },
                   onFieldSubmitted: (_) => _handleLogin(),
                 ),
                 const SizedBox(height: 8),
