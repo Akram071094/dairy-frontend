@@ -8,6 +8,10 @@ import 'package:dairy_frontend/core/theme/app_dimensions.dart';
 import 'package:dairy_frontend/core/theme/app_typography.dart';
 import 'package:dairy_frontend/features/auth/providers/auth_provider.dart';
 import 'package:dairy_frontend/shared/widgets/display/ai_assistant_avatar.dart';
+import 'package:dairy_frontend/features/staff_management/widgets/invite_staff_sheet.dart';
+import 'package:dairy_frontend/features/staff_management/widgets/staff_list_sheet.dart';
+import 'package:dairy_frontend/features/staff_management/widgets/manage_roles_sheet.dart';
+import 'package:dairy_frontend/features/staff_management/providers/staff_provider.dart';
 
 class ActionCenterScreen extends StatefulWidget {
   const ActionCenterScreen({super.key});
@@ -179,11 +183,83 @@ class _ActionCenterScreenState extends State<ActionCenterScreen> {
                         ))
                     .toList(),
               ),
+              const SizedBox(height: 24),
+              Text('Staff', style: AppTypography.h3),
+              const SizedBox(height: 12),
+              _StaffStats(),
+              const SizedBox(height: 12),
+              _AccountTile(
+                icon: Icons.person_add_rounded,
+                title: 'Invite Staff',
+                onTap: _showInviteStaffSheet,
+              ),
+              _AccountTile(
+                icon: Icons.people_rounded,
+                title: 'View All Staff',
+                onTap: _showStaffListSheet,
+              ),
+              _AccountTile(
+                icon: Icons.admin_panel_settings_rounded,
+                title: 'Manage Roles',
+                onTap: _showManageRolesSheet,
+              ),
+              const SizedBox(height: 24),
+              Text('Account', style: AppTypography.h3),
+              const SizedBox(height: 12),
+              _AccountTile(
+                icon: Icons.lock_outline_rounded,
+                title: 'Change Password',
+                onTap: _showChangePasswordSheet,
+              ),
               const SizedBox(height: 16),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showChangePasswordSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const _ChangePasswordSheet(),
+    );
+  }
+
+  void _showInviteStaffSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const InviteStaffSheet(),
+    );
+  }
+
+  void _showStaffListSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const StaffListSheet(),
+    );
+  }
+
+  void _showManageRolesSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const ManageRolesSheet(),
     );
   }
 }
@@ -477,6 +553,249 @@ class _AutomationTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _StaffStats extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<StaffProvider>();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppDimensions.radiusMd,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          _statItem(context, '${provider.totalStaff}', 'Total', Icons.people_rounded),
+          Container(width: 1, height: 32, color: AppColors.border),
+          _statItem(context, '${provider.activeStaff}', 'Active', Icons.check_circle_rounded),
+          Container(width: 1, height: 32, color: AppColors.border),
+          _statItem(context, '${provider.pendingInvitations}', 'Pending', Icons.hourglass_empty_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _statItem(BuildContext context, String value, String label, IconData icon) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, size: 18, color: AppColors.primary),
+          const SizedBox(height: 4),
+          Text(value, style: AppTypography.h4.copyWith(color: AppColors.text)),
+          Text(label, style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const _AccountTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppDimensions.radiusMd,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: AppDimensions.radiusMd,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: AppColors.primary),
+                const SizedBox(width: 12),
+                Text(title, style: AppTypography.body),
+                const Spacer(),
+                Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChangePasswordSheet extends StatefulWidget {
+  const _ChangePasswordSheet();
+
+  @override
+  State<_ChangePasswordSheet> createState() => _ChangePasswordSheetState();
+}
+
+class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _currentPwdCtl = TextEditingController();
+  final _newPwdCtl = TextEditingController();
+  final _confirmPwdCtl = TextEditingController();
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _currentPwdCtl.dispose();
+    _newPwdCtl.dispose();
+    _confirmPwdCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('Change Password', style: AppTypography.h3),
+            const SizedBox(height: 4),
+            Text(
+              'Enter your current password and a new one.',
+              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _currentPwdCtl,
+              obscureText: _obscureCurrent,
+              decoration: InputDecoration(
+                labelText: 'Current Password',
+                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureCurrent ? Icons.visibility_off : Icons.visibility, size: 20),
+                  onPressed: () => setState(() => _obscureCurrent = !_obscureCurrent),
+                ),
+              ),
+              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _newPwdCtl,
+              obscureText: _obscureNew,
+              decoration: InputDecoration(
+                labelText: 'New Password',
+                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureNew ? Icons.visibility_off : Icons.visibility, size: 20),
+                  onPressed: () => setState(() => _obscureNew = !_obscureNew),
+                ),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (v.length < 6) return 'At least 6 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _confirmPwdCtl,
+              obscureText: _obscureConfirm,
+              decoration: InputDecoration(
+                labelText: 'Confirm New Password',
+                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility, size: 20),
+                  onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                ),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (v != _newPwdCtl.text) return 'Passwords do not match';
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _submitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textOnPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppDimensions.radiusMd,
+                  ),
+                ),
+                child: _submitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Change Password'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _submitting = true);
+    final auth = context.read<AuthProvider>();
+    final error = await auth.changePassword(
+      _currentPwdCtl.text,
+      _newPwdCtl.text,
+    );
+    if (!mounted) return;
+    setState(() => _submitting = false);
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: Colors.red.shade700),
+      );
+    } else {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password changed successfully'),
+          backgroundColor: Color(0xFF0E7C66),
+        ),
+      );
+    }
   }
 }
 

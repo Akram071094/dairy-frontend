@@ -8,6 +8,8 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/services/auth_service.dart';
 import 'features/onboarding/providers/onboarding_provider.dart';
 import 'features/dashboard/providers/dashboard_provider.dart';
+import 'features/staff_management/providers/staff_provider.dart';
+import 'features/staff_management/services/staff_service.dart';
 import 'core/constants/app_constants.dart';
 
 void main() async {
@@ -29,6 +31,11 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => DashboardProvider(apiClient: apiClient),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => StaffProvider(
+            staffService: StaffService(apiClient: apiClient),
+          ),
         ),
       ],
       child: const DairyApp(),

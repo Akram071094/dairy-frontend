@@ -54,6 +54,21 @@ class AuthService {
     }
   }
 
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    try {
+      await _apiClient.post(
+        ApiConstants.changePassword,
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+          'confirm_password': newPassword,
+        },
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _apiClient.post(ApiConstants.logout);
@@ -63,6 +78,7 @@ class AuthService {
   }
 
   ApiException _handleError(DioException e) {
+    if (e.error is ApiException) return e.error as ApiException;
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
@@ -85,8 +101,6 @@ class AuthService {
           return DuplicateException(message);
         case 422:
           return ValidationException(message);
-        case 500:
-          return ServerException(message);
         default:
           return ApiException(message: message, statusCode: statusCode);
       }
@@ -100,6 +114,6 @@ class AuthService {
       if (data['message'] != null) return data['message'].toString();
       if (data['error'] != null) return data['error'].toString();
     }
-    return 'An unexpected error occurred';
+    return 'Unable to reach the server. Please check your connection and try again.';
   }
 }

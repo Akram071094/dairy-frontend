@@ -125,6 +125,7 @@ class SignupResponse {
   final String tokenType;
   final int expiresIn;
   final UserModel user;
+  final OrganizationBrief? organization;
 
   SignupResponse({
     required this.accessToken,
@@ -132,6 +133,7 @@ class SignupResponse {
     required this.tokenType,
     required this.expiresIn,
     required this.user,
+    this.organization,
   });
 
   factory SignupResponse.fromJson(Map<String, dynamic> json) {
@@ -141,6 +143,9 @@ class SignupResponse {
       tokenType: json['token_type'] ?? 'bearer',
       expiresIn: json['expires_in'] ?? 3600,
       user: UserModel.fromJson(json['user'] ?? {}),
+      organization: json['organization'] != null
+          ? OrganizationBrief.fromJson(json['organization'])
+          : null,
     );
   }
 }
