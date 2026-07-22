@@ -50,7 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
     if (!mounted) return;
     if (authProvider.isAuthenticated) {
-      context.go('/business-setup');
+      context.go('/action-center/business-setup');
     }
   }
 
