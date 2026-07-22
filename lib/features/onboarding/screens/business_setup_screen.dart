@@ -118,7 +118,7 @@ class _BusinessSetupScreenState extends State<BusinessSetupScreen> {
     );
     try {
       final orgId = await provider.createOrg(request);
-      if (mounted) context.go('/action-center/business-profile?orgId=$orgId');
+      if (mounted) context.go(AppRouter.actionCenter);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +170,7 @@ class _BusinessSetupScreenState extends State<BusinessSetupScreen> {
     return StepForm(
       prompt: "Let's start with the basics! I'll help you register your business in no time.",
       stepNumber: 1,
-      totalSteps: 5,
+      totalSteps: 1,
       isPrimaryLoading: provider.isLoading,
       primaryLabel: 'Create Business',
       onPrimaryTap: _onSubmit,
